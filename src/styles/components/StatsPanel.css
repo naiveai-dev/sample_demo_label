@@ -1,0 +1,25 @@
+@import '../variables.css';
+
+.stats-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  padding-top: 25px;
+}
+
+.credit-btn {
+  background-color: var(--verify-button);
+  color: white;
+  border: 3px solid var(--border-blue);
+  padding: 8px 15px;
+  margin-top: 15px;
+  font-family: 'Courier New', monospace;
+  font-size: 1rem;
+  cursor: pointer;
+  width: 100%;
+  text-align: center;
+}
+
+.credit-btn:hover {
+  opacity: 0.9;
+}

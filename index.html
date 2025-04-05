@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fission ID - Data Labeling</title>
+  <style>
+    :root {
+      --navy-blue: #141E61;
+      --light-gray: #d6d6d6;
+      --border-blue: #2a3f8d;
+      --text-color: #000000;
+      --verify-button: #1c1c4d;
+      --success-green: #27ae60;
+      --error-red: #c0392b;
+      --bg-color: #bebebe;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Courier New', monospace;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: auto auto;
+      gap: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .panel {
+      background-color: var(--light-gray);
+      border: 3px solid var(--border-blue);
+      border-radius: 0;
+      padding: 15px;
+      position: relative;
+    }
+
+    .panel-title {
+      position: absolute;
+      top: -15px;
+      left: 15px;
+      background-color: var(--light-gray);
+      padding: 0 10px;
+      color: var(--border-blue);
+      font-weight: bold;
+    }
+
+    .logo-panel {
+      background-color: var(--navy-blue);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 30px;
+    }
+
+    .logo {
+      color: white;
+      font-size: 3rem;
+      font-weight: bold;
+    }
+
+    .stats-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      padding-top: 25px;
+    }
+
+    .credit-btn {
+      background-color: var(--verify-button);
+      color: white;
+      border: 3px solid var(--border-blue);
+      padding: 8px 15px;
+      margin-top: 15px;
+      font-family: 'Courier New', monospace;
+      font-size: 1rem;
+      cursor: pointer;
+      width: 100%;
+      text-align: center;
+    }
+    
+    .credit-btn:hover {
+      opacity: 0.9;
+    }
+    
+    .credit-level-content {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    
+    .credit-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+    
+    .credit-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px;
+      background-color: rgba(255, 255, 255, 0.5);
+      border: 1px solid var(--border-blue);
+    }
+    
+    .credit-title {
+      font-size: 1.2rem;
+      font-weight: bold;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+    
+    .level-indicator {
+      width: 100%;
+      height: 30px;
+      background-color: rgba(255, 255, 255, 0.5);
+      border: 1px solid var(--border-blue);
+      position: relative;
+      margin-top: 10px;
+    }
+    
+    .level-fill {
+      height: 100%;
+      background-color: var(--navy-blue);
+      width: 75%;
+    }
+    
+    .level-label {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: white;
+      font-weight: bold;
+      text-shadow: 1px 1px 1px black;
+    }
+
+    .data-panel {
+      grid-column: span 2;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      padding-top: 25px;
+    }
+
+    .data-content {
+      background-color: rgba(255, 255, 255, 0.5);
+      border: 1px solid var(--border-blue);
+      padding: 15px;
+      margin: 15px 0;
+      font-family: 'Courier New', monospace;
+      white-space: pre-wrap;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .data-prompt {
+      text-align: center;
+      font-size: 1.2rem;
+      margin: 15px 0;
+    }
+
+    .button-container {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      margin-top: 20px;
+    }
+
+    .btn {
+      background-color: var(--verify-button);
+      color: white;
+      border: 3px solid var(--border-blue);
+      padding: 12px 40px;
+      font-size: 1.2rem;
+      cursor: pointer;
+      min-width: 140px;
+      text-align: center;
+      font-family: 'Courier New', monospace;
+      font-weight: bold;
+    }
+
+    .btn-yes {
+      background-color: var(--success-green);
+    }
+
+    .btn-no {
+      background-color: var(--error-red);
+    }
+
+    .btn:hover {
+      opacity: 0.9;
+    }
+
+    .keyboard-hint {
+      text-align: center;
+      margin-top: 15px;
+      font-size: 0.9rem;
+    }
+
+    .keyboard-key {
+      display: inline-block;
+      background-color: var(--verify-button);
+      color: white;
+      padding: 2px 8px;
+      border: 2px solid var(--border-blue);
+      margin: 0 5px;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 30px;
+      font-weight: bold;
+    }
+
+    .footer a {
+      color: var(--navy-blue);
+      text-decoration: underline;
+    }
+
+    @media (max-width: 768px) {
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .data-panel {
+        grid-column: span 1;
+      }
+      
+      .button-container {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="main-grid">
+    <!-- Logo Panel -->
+    <div class="panel logo-panel">
+      <div class="logo">FissionID</div>
+    </div>
+
+    <!-- Stats Panel -->
+    <div class="panel stats-panel">
+      <div class="panel-title">Labeling Stats</div>
+      
+      <div>Current Progress: <b>15 / 100</b> samples</div>
+      
+      <button id="credit-level-btn" class="credit-btn" onclick="showCreditLevel()">
+        User Credit Level
+      </button>
+    </div>
+
+    <!-- Data Labeling Panel -->
+    <div class="panel data-panel">
+      <div class="panel-title">Data Labeling</div>
+      
+      <div>Sample ID: <b>TX482-95JK</b> (16 of 100)</div>
+      
+      <div class="data-content">
+{
+  "user_query": "What are the benefits of implementing AI in healthcare?",
+  "response_fragment": "AI systems can assist in early disease detection through pattern recognition in medical images and patient data, potentially identifying conditions before they become symptomatic. This allows for earlier interventions which typically result in better patient outcomes."
+}
+      </div>
+      
+      <div class="data-prompt">
+        Is this response accurate and helpful?
+      </div>
+      
+      <div class="button-container">
+        <button id="btn-yes" class="btn btn-yes" onclick="labelData('yes')">
+          Yes (O)
+        </button>
+        <button id="btn-no" class="btn btn-no" onclick="labelData('no')">
+          No (X)
+        </button>
+      </div>
+      
+      <div class="keyboard-hint">
+        Keyboard shortcuts: <span class="keyboard-key">O</span> for Yes, <span class="keyboard-key">X</span> for No
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    © <a href="#">Fission</a>
+  </div>
+
+  <script>
+    let stats = {
+      total: 15,
+      yes: 9,
+      no: 6,
+      accuracy: 84,
+      speed: 4.2
+    };
+    
+    let creditLevel = {
+      accuracy: 84,
+      level: "Intermediate",
+      completedTasks: 278,
+      remainingQuota: 122,
+      trustScore: 75
+    };
+    
+    // Store original data panel content to restore it later
+    let originalDataPanelContent = null;
+    
+    function showCreditLevel() {
+      const dataPanel = document.querySelector('.data-panel');
+      
+      // Store original content if we haven't already
+      if (!originalDataPanelContent) {
+        originalDataPanelContent = dataPanel.innerHTML;
+      }
+      
+      // Replace data panel content with user credit level info
+      dataPanel.innerHTML = `
+        <div class="panel-title">User Credit Level</div>
+        
+        <div class="credit-level-content">
+          <div class="credit-title">User: DataLabeler_42</div>
+          
+          <div>Current Level: <b>${creditLevel.level}</b></div>
+          
+          <div class="level-indicator">
+            <div class="level-fill" style="width: ${creditLevel.trustScore}%"></div>
+            <div class="level-label">${creditLevel.trustScore}% to next level</div>
+          </div>
+          
+          <div class="credit-stats">
+            <div class="credit-item">
+              <span>User Accuracy</span>
+              <span>${creditLevel.accuracy}%</span>
+            </div>
+            <div class="credit-item">
+              <span>Completed Tasks</span>
+              <span>${creditLevel.completedTasks}</span>
+            </div>
+            <div class="credit-item">
+              <span>AI Evaluation Quota</span>
+              <span>${creditLevel.remainingQuota}</span>
+            </div>
+            <div class="credit-item">
+              <span>Trust Score</span>
+              <span>${creditLevel.trustScore}/100</span>
+            </div>
+          </div>
+          
+          <button class="credit-btn" onclick="returnToLabeling()">
+            Return to Labeling
+          </button>
+        </div>
+      `;
+    }
+    
+    function returnToLabeling() {
+      if (originalDataPanelContent) {
+        document.querySelector('.data-panel').innerHTML = originalDataPanelContent;
+      }
+    }
+
+    function labelData(label) {
+      // Update statistics
+      stats.total++;
+      if (label === 'yes') {
+        stats.yes++;
+      } else {
+        stats.no++;
+      }
+
+      // Update UI
+      document.querySelector('.stats-panel > div:nth-child(2)').innerHTML = `Current Progress: <b>${stats.total} / 100</b> samples`;
+      document.querySelector('.data-panel > div:nth-child(2)').innerHTML = `Sample ID: <b>TX482-${Math.floor(Math.random() * 900) + 100}</b> (${stats.total + 1} of 100)`;
+
+      // In a real application, you would send this data to a server
+      // and load the next sample
+      alert(`Data labeled as: ${label}`);
+      
+      // Simulate loading a new sample (in a real app, this would come from the server)
+      setTimeout(() => {
+        // Next sample would load here
+      }, 500);
+    }
+
+    // Add keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+      if (e.key.toLowerCase() === 'o') {
+        const yesButton = document.getElementById('btn-yes');
+        if (yesButton) yesButton.click();
+      } else if (e.key.toLowerCase() === 'x') {
+        const noButton = document.getElementById('btn-no');
+        if (noButton) noButton.click();
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,24 +1,24 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useContext } from 'react';
+import { AppContext } from './context/AppContext';
+import LogoPanel from './components/LogoPanel';
+import StatsPanel from './components/StatsPanel';
+import DataLabelingPanel from './components/DataLabelingPanel';
+import CreditLevelPanel from './components/CreditLevelPanel';
+import Footer from './components/Footer';
+import './styles/global.css';
 
 function App() {
+  const { showingCreditLevel } = useContext(AppContext);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <>
+      <div className="main-grid">
+        <LogoPanel />
+        <StatsPanel />
+        {showingCreditLevel ? <CreditLevelPanel /> : <DataLabelingPanel />}
+      </div>
+      <Footer />
+    </>
   );
 }
 

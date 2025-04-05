@@ -1,0 +1,260 @@
+@import './variables.css';
+
+:root {
+  --navy-blue: #141E61;
+  --light-gray: #d6d6d6;
+  --border-blue: #2a3f8d;
+  --text-color: #000000;
+  --verify-button: #1c1c4d;
+  --success-green: #27ae60;
+  --error-red: #c0392b;
+  --bg-color: #bebebe;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Courier New', monospace;
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+}
+
+.main-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto auto;
+  gap: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.panel {
+  background-color: var(--light-gray);
+  border: 3px solid var(--border-blue);
+  border-radius: 0;
+  padding: 15px;
+  position: relative;
+}
+
+.panel-title {
+  position: absolute;
+  top: -15px;
+  left: 15px;
+  background-color: var(--light-gray);
+  padding: 0 10px;
+  color: var(--border-blue);
+  font-weight: bold;
+}
+
+.logo-panel {
+  background-color: var(--navy-blue);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 30px;
+}
+
+.logo {
+  color: white;
+  font-size: 3rem;
+  font-weight: bold;
+}
+
+.stats-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  padding-top: 25px;
+}
+
+.credit-btn {
+  background-color: var(--verify-button);
+  color: white;
+  border: 3px solid var(--border-blue);
+  padding: 8px 15px;
+  margin-top: 15px;
+  font-family: 'Courier New', monospace;
+  font-size: 1rem;
+  cursor: pointer;
+  width: 100%;
+  text-align: center;
+}
+
+.credit-btn:hover {
+  opacity: 0.9;
+}
+
+.credit-level-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.credit-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+.credit-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px;
+  background-color: rgba(255, 255, 255, 0.5);
+  border: 1px solid var(--border-blue);
+}
+
+.credit-title {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.level-indicator {
+  width: 100%;
+  height: 30px;
+  background-color: rgba(255, 255, 255, 0.5);
+  border: 1px solid var(--border-blue);
+  position: relative;
+  margin-top: 10px;
+}
+
+.level-fill {
+  height: 100%;
+  background-color: var(--navy-blue);
+  width: 75%;
+}
+
+.level-label {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-weight: bold;
+  text-shadow: 1px 1px 1px black;
+}
+
+.data-panel {
+  grid-column: span 2;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  padding-top: 25px;
+}
+
+.data-content {
+  background-color: rgba(255, 255, 255, 0.5);
+  border: 1px solid var(--border-blue);
+  padding: 15px;
+  margin: 15px 0;
+  font-family: 'Courier New', monospace;
+  white-space: pre-wrap;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.data-prompt {
+  text-align: center;
+  font-size: 1.2rem;
+  margin: 15px 0;
+}
+
+.button-container {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  margin-top: 20px;
+}
+
+.btn {
+  background-color: var(--verify-button);
+  color: white;
+  border: 3px solid var(--border-blue);
+  padding: 12px 40px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  min-width: 140px;
+  text-align: center;
+  font-family: 'Courier New', monospace;
+  font-weight: bold;
+}
+
+.btn-yes {
+  background-color: var(--success-green);
+}
+
+.btn-no {
+  background-color: var(--error-red);
+}
+
+.btn:hover {
+  opacity: 0.9;
+}
+
+.keyboard-hint {
+  text-align: center;
+  margin-top: 15px;
+  font-size: 0.9rem;
+}
+
+.keyboard-key {
+  display: inline-block;
+  background-color: var(--verify-button);
+  color: white;
+  padding: 2px 8px;
+  border: 2px solid var(--border-blue);
+  margin: 0 5px;
+}
+
+.footer {
+  text-align: center;
+  margin-top: 30px;
+  font-weight: bold;
+}
+
+.footer a {
+  color: var(--navy-blue);
+  text-decoration: underline;
+}
+
+.validation-badge {
+  display: inline-block;
+  background-color: #ff9800;
+  color: white;
+  font-size: 0.8rem;
+  padding: 2px 8px;
+  border-radius: 10px;
+  margin-left: 10px;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
+}
+
+@media (max-width: 768px) {
+  .main-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .data-panel {
+    grid-column: span 1;
+  }
+  
+  .button-container {
+    flex-direction: column;
+    align-items: center;
+  }
+}

@@ -1,0 +1,15 @@
+@import '../variables.css';
+
+.logo-panel {
+  background-color: var(--navy-blue);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 30px;
+}
+
+.logo {
+  color: white;
+  font-size: 3rem;
+  font-weight: bold;
+}
