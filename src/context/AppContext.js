@@ -1,6 +1,6 @@
 import React, { createContext, useState, useEffect } from 'react';
 import sampleData from '../data/query_example.json';
-import { validateUserAuthenticity } from '../services/claudeService';
+//import { validateUserAuthenticity } from '../services/claudeService';
 
 export const AppContext = createContext();
 
@@ -24,8 +24,8 @@ export const AppProvider = ({ children }) => {
   
   const [showingCreditLevel, setShowingCreditLevel] = useState(false);
   const [labelingHistory, setLabelingHistory] = useState([]);
-  const [userValidationInProgress, setUserValidationInProgress] = useState(false);
-  const [validationResult, setValidationResult] = useState(null);
+  const [userValidationInProgress] = useState(false);
+  const [validationResult,] = useState(null);
   
   // Initialize current sample with default values matching the original HTML
   const [currentSample, setCurrentSample] = useState({
@@ -53,47 +53,7 @@ export const AppProvider = ({ children }) => {
       });
     }
   }, []);
-  
-  // Check if we need to validate the user (after every 5 labelings)
-  useEffect(() => {
-    const checkUserAuthenticity = async () => {
-      if (labelingHistory.length >= 5 && !userValidationInProgress) {
-        setUserValidationInProgress(true);
-        
-        // Get the last 5 labeled items
-        const lastFiveItems = labelingHistory.slice(-5);
-        
-        try {
-          // Call Claude API to validate user
-          const result = await validateUserAuthenticity(lastFiveItems);
-          setValidationResult(result);
-          
-          // Update credit level based on validation
-          setCreditLevel(prev => ({
-            ...prev,
-            isGenuineUser: result.isGenuineUser,
-            trustScore: result.isGenuineUser ? 
-              Math.min(prev.trustScore + 5, 100) : 
-              Math.max(prev.trustScore - 10, 0)
-          }));
-          
-          // Show validation result to user if not genuine
-          if (!result.isGenuineUser) {
-            alert(`User validation warning: ${result.reasoning}`);
-            setShowingCreditLevel(true);
-          }
-        } catch (error) {
-          console.error("Error during user validation:", error);
-        } finally {
-          // Clear history after validation
-          setLabelingHistory([]);
-          setUserValidationInProgress(false);
-        }
-      }
-    };
-    
-    checkUserAuthenticity();
-  }, [labelingHistory, userValidationInProgress]);
+
 const labelData = (label) => {
   // Find the current sample in the original data to get its ground truth
   const currentSampleData = sampleData.samples.find(sample => sample.id === currentSample.id);
@@ -171,31 +131,6 @@ const labelData = (label) => {
     });
   }
   
-  // Check if we need to validate the user (e.g., after every 5 labelings)
-  if (updatedHistory.length % 5 === 0 && updatedHistory.length > 0) {
-    setUserValidationInProgress(true);
-    
-    // Get the last 5 items for validation
-    const recentHistory = updatedHistory.slice(-5);
-    
-    // Call validation service
-    validateUserAuthenticity(recentHistory)
-      .then(result => {
-        setValidationResult(result);
-        
-        // Update isGenuineUser based on validation result
-        setCreditLevel(prevLevel => ({
-          ...prevLevel,
-          isGenuineUser: result.isGenuineUser
-        }));
-        
-        setUserValidationInProgress(false);
-      })
-      .catch(error => {
-        console.error("Validation error:", error);
-        setUserValidationInProgress(false);
-      });
-  }
 };  return (
     <AppContext.Provider value={{
       stats,
@@ -205,7 +140,8 @@ const labelData = (label) => {
       currentSample,
       labelData,
       validationResult,
-      userValidationInProgress
+      userValidationInProgress,
+      labelingHistory
     }}>
       {children}
     </AppContext.Provider>

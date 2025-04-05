@@ -19,10 +19,18 @@ export const getNextSample = (samples, currentIndex) => {
  * @returns {string} - Formatted history string
  */
 export const formatLabelingHistory = (history) => {
-  return history.map((item, index) => `
+  if (!Array.isArray(history) || history.length === 0) {
+    return "No labeling history available.";
+  }
+  
+  return history.map((item, index) => {
+    if (!item) return `Sample ${index + 1}: Invalid data`;
+    
+    return `
     Sample ${index + 1}:
-    User Query: "${item.user_query}"
-    Response Fragment: "${item.response_fragment}"
-    User's Label: ${item.userLabel}
-  `).join('\n');
+    User Query: "${item.user_query || 'N/A'}"
+    Response Fragment: "${item.response_fragment || 'N/A'}"
+    User's Label: ${item.userLabel || 'N/A'}
+  `;
+  }).join('\n');
 };

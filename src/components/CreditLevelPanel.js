@@ -1,46 +1,60 @@
-import React, { useContext } from 'react';
-import { AppContext } from '../context/AppContext';
-import '../styles/components/CreditLevelPanel.css';
+import React, { useContext, useState } from "react";
+import { AppContext } from "../context/AppContext";
+import { formatLabelingHistory } from "../utils/sampleUtils";
+import { validateUserAuthenticity } from "../services/claudeService";
+import "../styles/components/CreditLevelPanel.css";
 
 const CreditLevelPanel = () => {
-  const { creditLevel, setShowingCreditLevel, validationResult } = useContext(AppContext);
-  
-  const returnToLabeling = () => {
+  const { creditLevel, setShowingCreditLevel, labelingHistory } =
+    useContext(AppContext);
+  const [evaluationResult, setEvaluationResult] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const hideCreditLevel = () => {
     setShowingCreditLevel(false);
+    setEvaluationResult(null);
   };
-  
+
+  const handleAIEvaluation = async () => {
+    setIsLoading(true);
+
+    try {
+      // Check if labelingHistory exists and has items
+      if (!labelingHistory || labelingHistory.length === 0) {
+        setEvaluationResult(
+          "No labeling history available. Please label some samples first."
+        );
+        setIsLoading(false);
+        return;
+      }
+      const labelSequence = labelingHistory;
+      const formattedHistory = formatLabelingHistory(labelingHistory);
+      const result = await validateUserAuthenticity(
+        labelSequence,
+        formattedHistory
+      );
+      setEvaluationResult(result);
+    } catch (error) {
+      console.error("Error during AI evaluation:", error);
+      setEvaluationResult(
+        "Error occurred during evaluation. Please try again."
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="panel data-panel">
       <div className="panel-title">User Credit Level</div>
-      
+
       <div className="credit-level-content">
         <div className="credit-title">User: DataLabeler_42</div>
-        
-        <div>Current Level: <b>{creditLevel.level}</b></div>
-        
-        <div className="level-indicator">
-          <div 
-            className="level-fill" 
-            style={{ 
-              width: `${creditLevel.trustScore}%`,
-              backgroundColor: creditLevel.isGenuineUser ? undefined : '#f44336' 
-            }}
-          ></div>
-          <div className="level-label">{creditLevel.trustScore}% to next level</div>
+
+        <div>
+          Current Level: <b>{creditLevel.level}</b>
         </div>
-        
-        {validationResult && !creditLevel.isGenuineUser && (
-          <div style={{ 
-            backgroundColor: 'rgba(255, 0, 0, 0.1)', 
-            padding: '10px', 
-            border: '1px solid #f44336',
-            marginTop: '10px'
-          }}>
-            <div style={{ fontWeight: 'bold', color: '#f44336' }}>AI Validation Warning</div>
-            <div>{validationResult.reasoning}</div>
-          </div>
-        )}
-        
+
         <div className="credit-stats">
           <div className="credit-item">
             <span>User Accuracy</span>
@@ -51,19 +65,69 @@ const CreditLevelPanel = () => {
             <span>{creditLevel.completedTasks}</span>
           </div>
           <div className="credit-item">
-            <span>AI Evaluation Quota</span>
-            <span>{creditLevel.remainingQuota}</span>
+            <button
+              className="ai-evaluation-btn"
+              onClick={handleAIEvaluation}
+              disabled={isLoading}
+            >
+              {isLoading ? "Evaluating..." : "AI Evaluation"}
+            </button>
           </div>
           <div className="credit-item">
             <span>Trust Score</span>
-            <span>{creditLevel.trustScore}/100</span>
+            <span>
+              {evaluationResult && evaluationResult.includes("<trust_score>")
+                ? Math.round(
+                    parseFloat(
+                      evaluationResult
+                        .split("<trust_score>")[1]
+                        .split("</trust_score>")[0]
+                        .trim()
+                    ) * 10
+                  )
+                : 0}
+              /100
+            </span>
           </div>
         </div>
-        
-        <button className="credit-btn" onClick={returnToLabeling}>
+
+        <button className="credit-btn" onClick={hideCreditLevel}>
           Return to Labeling
         </button>
       </div>
+
+      {evaluationResult && (
+        <div className="evaluation-result-popup">
+          <h3>AI Evaluation Result</h3>
+          {evaluationResult.includes("<general_thoughts>") ? (
+            <>
+              <div className="result-section">
+                <h4>General Thoughts</h4>
+                <p>
+                  {evaluationResult
+                    .split("<general_thoughts>")[1]
+                    .split("</general_thoughts>")[0]
+                    .trim()}
+                </p>
+              </div>
+              {evaluationResult.includes("<deep_speculation>") && (
+                <div className="result-section">
+                  <h4>Deep Speculation</h4>
+                  <p>
+                    {evaluationResult
+                      .split("<deep_speculation>")[1]
+                      .split("</deep_speculation>")[0]
+                      .trim()}
+                  </p>
+                </div>
+              )}
+            </>
+          ) : (
+            <p>{evaluationResult}</p>
+          )}
+          <button onClick={() => setEvaluationResult(null)}>Close</button>
+        </div>
+      )}
     </div>
   );
 };
