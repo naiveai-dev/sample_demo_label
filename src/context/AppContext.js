@@ -6,19 +6,19 @@ export const AppContext = createContext();
 
 export const AppProvider = ({ children }) => {
   const [stats, setStats] = useState({
-    total: 15,
-    yes: 9,
-    no: 6,
-    accuracy: 84,
+    total: 1,
+    yes: 0,
+    no: 0,
+    accuracy: 0,
     speed: 4.2
   });
   
   const [creditLevel, setCreditLevel] = useState({
-    accuracy: 84,
+    accuracy: 0,
     level: "Intermediate",
-    completedTasks: 278,
-    remainingQuota: 122,
-    trustScore: 75,
+    completedTasks: 0,
+    remainingQuota: 0,
+    trustScore: 0,
     isGenuineUser: true
   });
   
@@ -30,8 +30,8 @@ export const AppProvider = ({ children }) => {
   // Initialize current sample with default values matching the original HTML
   const [currentSample, setCurrentSample] = useState({
     id: "TX482-95JK",
-    number: 16,
-    total: 100,
+    number: 1,
+    total: 10,
     data: {
       user_query: "What are the benefits of implementing AI in healthcare?",
       response_fragment: "AI systems can assist in early disease detection through pattern recognition in medical images and patient data, potentially identifying conditions before they become symptomatic. This allows for earlier interventions which typically result in better patient outcomes."
@@ -44,8 +44,8 @@ export const AppProvider = ({ children }) => {
       const firstSample = sampleData.samples[0];
       setCurrentSample({
         id: firstSample.id,
-        number: 16, // Keep the original number
-        total: 100, // Keep the original total
+        number: 1, // Keep the original number
+        total: 10, // Keep the original total
         data: {
           user_query: firstSample.user_query,
           response_fragment: firstSample.response_fragment
@@ -94,68 +94,109 @@ export const AppProvider = ({ children }) => {
     
     checkUserAuthenticity();
   }, [labelingHistory, userValidationInProgress]);
+const labelData = (label) => {
+  // Find the current sample in the original data to get its ground truth
+  const currentSampleData = sampleData.samples.find(sample => sample.id === currentSample.id);
+  const isCorrect = (label === 'yes' && currentSampleData.ground_truth === true) || 
+                    (label === 'no' && currentSampleData.ground_truth === false);
   
-  const labelData = (label) => {
-    // Don't allow labeling during validation
-    if (userValidationInProgress) return;
-    
-    // Add current sample and label to history
-    const historyItem = {
-      id: currentSample.id,
-      user_query: currentSample.data.user_query,
-      response_fragment: currentSample.data.response_fragment,
-      userLabel: label
-    };
-    
-    setLabelingHistory(prev => [...prev, historyItem]);
-    
-    // Update statistics
-    setStats(prevStats => ({
-      ...prevStats,
-      total: prevStats.total + 1,
-      yes: label === 'yes' ? prevStats.yes + 1 : prevStats.yes,
-      no: label === 'no' ? prevStats.no + 1 : prevStats.no
-    }));
-    
-    // Update credit level
-    setCreditLevel(prev => ({
-      ...prev,
-      completedTasks: prev.completedTasks + 1,
-      remainingQuota: prev.remainingQuota - 1
-    }));
-
-    // Generate a new sample ID (matching the format in the original HTML)
-    const newId = `TX482-${Math.floor(Math.random() * 900) + 100}`;
-    
-    // Get next sample from JSON if available, otherwise generate random
-    let nextSample = {
-      user_query: "What are the benefits of implementing AI in healthcare?",
-      response_fragment: "AI systems can assist in early disease detection through pattern recognition in medical images and patient data, potentially identifying conditions before they become symptomatic. This allows for earlier interventions which typically result in better patient outcomes."
-    };
-    
-    if (sampleData && sampleData.samples && sampleData.samples.length > 0) {
-      const nextIndex = (currentSample.number % sampleData.samples.length);
-      if (sampleData.samples[nextIndex]) {
-        nextSample = {
-          user_query: sampleData.samples[nextIndex].user_query,
-          response_fragment: sampleData.samples[nextIndex].response_fragment
-        };
-      }
-    }
-    
-    // Update current sample
-    setCurrentSample(prev => ({
-      ...prev,
-      id: newId,
-      number: prev.number + 1,
-      data: nextSample
-    }));
-    
-    // In a real app, you would send this data to a server
-    alert(`Data labeled as: ${label}`);
+  // Update labeling history
+  const newHistoryItem = {
+    id: currentSample.id,
+    user_query: currentSample.data.user_query,
+    response_fragment: currentSample.data.response_fragment,
+    userLabel: label,
+    isCorrect: isCorrect
   };
-
-  return (
+  
+  const updatedHistory = [...labelingHistory, newHistoryItem];
+  setLabelingHistory(updatedHistory);
+  
+  // Update stats
+  const newTotal = stats.total + 1;
+  const newYes = label === 'yes' ? stats.yes + 1 : stats.yes;
+  const newNo = label === 'no' ? stats.no + 1 : stats.no;
+  
+  // Calculate accuracy based on correct answers
+  const correctAnswers = updatedHistory.filter(item => item.isCorrect).length;
+  const newAccuracy = (correctAnswers / updatedHistory.length) * 100;
+  
+  setStats({
+    ...stats,
+    total: newTotal,
+    yes: newYes,
+    no: newNo,
+    accuracy: newAccuracy.toFixed(1) // Round to 1 decimal place
+  });
+  
+  // Update credit level based on user performance
+  const completedTasks = newTotal;
+  const remainingQuota = sampleData.samples.length - completedTasks;
+  
+  // Calculate trust score (0-100) based on accuracy and number of completed tasks
+  // More weight on accuracy (70%) and some weight on completion (30%)
+  const trustScore = (newAccuracy * 0.7) + ((completedTasks / sampleData.samples.length) * 100 * 0.3);
+  
+  // Determine level based on trust score
+  let level = "Beginner";
+  if (trustScore >= 90) {
+    level = "Expert";
+  } else if (trustScore >= 70) {
+    level = "Advanced";
+  } else if (trustScore >= 50) {
+    level = "Intermediate";
+  }
+  
+  // Update credit level
+  setCreditLevel({
+    accuracy: newAccuracy.toFixed(1),
+    level: level,
+    completedTasks: completedTasks,
+    remainingQuota: remainingQuota,
+    trustScore: trustScore.toFixed(1),
+    isGenuineUser: true // This could be updated based on validation results
+  });
+  
+  // Move to next sample if not at the end
+  if (newTotal <= sampleData.samples.length) {
+    const nextSample = sampleData.samples[newTotal - 1];
+    setCurrentSample({
+      id: nextSample.id,
+      number: newTotal,
+      total: sampleData.samples.length,
+      data: {
+        user_query: nextSample.user_query,
+        response_fragment: nextSample.response_fragment
+      }
+    });
+  }
+  
+  // Check if we need to validate the user (e.g., after every 5 labelings)
+  if (updatedHistory.length % 5 === 0 && updatedHistory.length > 0) {
+    setUserValidationInProgress(true);
+    
+    // Get the last 5 items for validation
+    const recentHistory = updatedHistory.slice(-5);
+    
+    // Call validation service
+    validateUserAuthenticity(recentHistory)
+      .then(result => {
+        setValidationResult(result);
+        
+        // Update isGenuineUser based on validation result
+        setCreditLevel(prevLevel => ({
+          ...prevLevel,
+          isGenuineUser: result.isGenuineUser
+        }));
+        
+        setUserValidationInProgress(false);
+      })
+      .catch(error => {
+        console.error("Validation error:", error);
+        setUserValidationInProgress(false);
+      });
+  }
+};  return (
     <AppContext.Provider value={{
       stats,
       creditLevel,

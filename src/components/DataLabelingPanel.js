@@ -40,7 +40,6 @@ const DataLabelingPanel = () => {
       <div className="data-prompt">
         Is this response accurate and helpful?
       </div>
-      
       <div className="button-container">
         <button 
           id="btn-yes" 
@@ -59,7 +58,6 @@ const DataLabelingPanel = () => {
           No (X)
         </button>
       </div>
-      
       <div className="keyboard-hint">
         Keyboard shortcuts: <span className="keyboard-key">O</span> for Yes, <span className="keyboard-key">X</span> for No
       </div>

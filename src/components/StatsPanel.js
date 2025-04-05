@@ -13,7 +13,8 @@ const StatsPanel = () => {
     <div className="panel stats-panel">
       <div className="panel-title">Labeling Stats</div>
       
-      <div>Current Progress: <b>{stats.total} / 100</b> samples</div>
+      <div>Current Progress: <b>{stats.total} / 10</b> samples</div>
+      <div>User Accuracy: <b>{stats.accuracy}%</b></div>
       
       <button id="credit-level-btn" className="credit-btn" onClick={showCreditLevel}>
         User Credit Level
